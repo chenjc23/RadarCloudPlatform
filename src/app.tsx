@@ -23,10 +23,12 @@ export async function getInitialState(): Promise<{
 }> {
   const fetchUserInfo = async () => {
     try {
-      const msg = await queryCurrentUser({
-        skipErrorHandler: true,
-      });
-      return msg.data;
+      // const msg = await queryCurrentUser({
+      //   skipErrorHandler: true,
+      // });
+      // return msg.data;
+      // 此处全局提供默认用户
+      return {name: "admin"};
     } catch (error) {
       history.push(loginPath);
     }
