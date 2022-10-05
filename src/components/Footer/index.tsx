@@ -18,8 +18,8 @@ const Footer: React.FC = () => {
           href: 'https://github.com/chenjc23/RadarCloudPlatform',
         },
         {
-          key: 'Jc Chen',
-          title: 'Jc Chen',
+          key: 'By Jc Chen',
+          title: 'By Jc Chen',
           href: 'https://github.com/chenjc23/RadarCloudPlatform',
         },
       ]}
