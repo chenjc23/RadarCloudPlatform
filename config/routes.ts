@@ -50,6 +50,18 @@ export default [
     component: './TableList',
   },
   {
+    name: '设备管理',
+    path: '/device',
+    component: './Device',
+    icon: 'dashboard'
+  },
+  {
+    name: '算法配置',
+    path: '/algorithm',
+    component: './Algorithm',
+    icon: 'form'
+  },
+  {
     path: '/',
     redirect: '/welcome',
   },
