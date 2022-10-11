@@ -44,12 +44,6 @@ export default [
     ],
   },
   {
-    name: 'list.table-list',
-    icon: 'table',
-    path: '/list',
-    component: './TableList',
-  },
-  {
     name: '设备管理',
     path: '/device',
     component: './Device',
