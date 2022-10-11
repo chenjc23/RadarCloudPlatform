@@ -25,7 +25,7 @@ const GlobalHeaderRight: React.FC = () => {
       <span
         className={styles.action}
         onClick={() => {
-          window.open('https://localhost:8000/welcome');
+          window.open('http://localhost:8000/welcome');
         }}
       >
         <QuestionCircleOutlined />
