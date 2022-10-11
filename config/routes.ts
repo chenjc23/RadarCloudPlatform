@@ -59,7 +59,14 @@ export default [
     name: '算法配置',
     path: '/algorithm',
     component: './Algorithm',
-    icon: 'form'
+    icon: 'form',
+  },
+  {
+    name: '数据分析',
+    path: '/dataAnalyse',
+    component: './DataAnalyse',
+    icon: 'table',
+    hideInBreadcrumb: true,
   },
   {
     path: '/',
