@@ -22,7 +22,7 @@ export default [
   },
   {
     path: '/welcome',
-    name: 'welcome',
+    name: '欢迎',
     icon: 'smile',
     component: './Welcome',
   },
@@ -47,7 +47,7 @@ export default [
     name: '设备管理',
     path: '/device',
     component: './Device',
-    icon: 'dashboard'
+    icon: 'dashboard',
   },
   {
     name: '算法配置',

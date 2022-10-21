@@ -15,6 +15,10 @@ export default defineConfig({
    */
   hash: true,
 
+  mfsu: {
+    strategy: 'normal',
+  },
+
   /**
    * @name 兼容性设置
    * @description 设置 ie11 不一定完美兼容，需要检查自己使用的所有依赖
@@ -84,13 +88,14 @@ export default defineConfig({
    * @name 国际化插件
    * @doc https://umijs.org/docs/max/i18n
    */
-  locale: {
-    // default zh-CN
-    default: 'zh-CN',
-    antd: true,
-    // default true, when it is true, will use `navigator.language` overwrite default
-    baseNavigator: true,
-  },
+  // 取消多语言功能
+  // locale: {
+  //   // default zh-CN
+  //   default: 'zh-CN',
+  //   antd: true,
+  //   // default true, when it is true, will use `navigator.language` overwrite default
+  //   baseNavigator: true,
+  // },
   /**
    * @name antd 插件
    * @description 内置了 babel import 插件
