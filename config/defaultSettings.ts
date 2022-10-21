@@ -7,9 +7,9 @@ const Settings: LayoutSettings & {
   pwa?: boolean;
   logo?: string;
 } = {
-  navTheme: 'realDark',
+  navTheme: 'light',
   // 拂晓蓝
-  colorPrimary: '#1890ff',
+  colorPrimary: '#722ED1',
   layout: 'top',
   contentWidth: 'Fluid',
   fixedHeader: false,

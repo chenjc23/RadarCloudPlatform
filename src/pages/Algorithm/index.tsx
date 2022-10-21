@@ -21,7 +21,7 @@ const Algorithm: React.FC = () => {
 
 
   return (
-      <PageContainer>
+      <PageContainer header={{title: '', breadcrumb: {}}}>
         <Form
           form={form}
           className={styles.algorithm}

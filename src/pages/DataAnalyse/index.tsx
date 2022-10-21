@@ -9,6 +9,8 @@ import { Row, Col, Radio, Switch, Select, DatePicker, Table } from "antd";
 import type { RadioChangeEvent } from "antd";
 import { useState, useEffect } from "react";
 import { FieldTimeOutlined } from "@ant-design/icons";
+import DataAnalyseCharts from './components/DataAnalyseCharts';
+
 import type { GnotePoint, DistancePoint } from "@/models/supervisePoint";
 import styles from './index.less';
 
@@ -197,6 +199,8 @@ const DataAnalyse: React.FC = () => {
           <div>
             <div id='cesiumContainer'/>
           </div>
+          <p></p>
+          <DataAnalyseCharts />
         </Col>
       </Row>
 
