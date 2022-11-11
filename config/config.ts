@@ -19,14 +19,15 @@ export default defineConfig({
     strategy: 'normal',
   },
 
+  // targets这个地方是解决界面滑动不了，无法加载等问题的关键
   /**
    * @name 兼容性设置
    * @description 设置 ie11 不一定完美兼容，需要检查自己使用的所有依赖
    * @doc https://umijs.org/docs/api/config#targets
    */
-  // targets: {
-  //   ie: 11,
-  // },
+  targets: {
+    ie: 11,
+  },
   /**
    * @name 路由的配置，不在路由中引入的文件不会编译
    * @description 只支持 path，component，routes，redirect，wrappers，title 的配置
