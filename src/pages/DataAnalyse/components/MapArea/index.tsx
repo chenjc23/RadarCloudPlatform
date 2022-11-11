@@ -10,6 +10,8 @@ Cesium.Ion.defaultAccessToken =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhOGM1Y2MyYy0zNzhjLTQwN2QtYjkyOC0zZDYzN' +
   'jI5NTEyNTAiLCJpZCI6MTA5NzUwLCJpYXQiOjE2NjQ1MjM0NDZ9.gPRCXltXZgZxTZDdtToSvyxAdRfOjNQRvUdWHCyYXDQ';
 
+import { radarSpecific } from '@/constant/radarSpecific';
+
 type MapAreaProps = {
   clipEnable?: boolean;
 };
@@ -20,57 +22,60 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
 
   // 仅挂载后运行一次cesium初始化
   useEffect(() => {
-    const setCesium = () => {
-      // const arc = new Cesium.ArcGisMapServerImageryProvider({
-      //   url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
-      // });
+    // 获取雷达相关参数
+    const {
+      radarLocation: { longitude, latitude },
+      imageSpan: { lngMin, lngMax, latMin, latMax },
+    } = radarSpecific;
 
-      // 设置地形Provider
-      const terrainProvider = new Cesium.CesiumTerrainProvider({
-        url: 'http://localhost:80/slicehash/demo',
-      });
+    // 设置地形Provider, 即DEM底图
+    const terrainProvider = new Cesium.CesiumTerrainProvider({
+      url: 'http://localhost:80/slicehash/demo',
+    });
+    // 创建viewer视图
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+      // imageryProvider: arc,
+      // terrainProvider : new Cesium.CesiumTerrainProvider({
+      //   url : Cesium.IonResource.fromAssetId(3956),
+      //   requestVertexNormals : true
+      // }),
+      terrainProvider,
+      homeButton: false,
+      navigationHelpButton: false,
+      geocoder: false,
+      // fullscreenButton: false,
+      baseLayerPicker: false,
+      timeline: false,
+      shouldAnimate: false,
+      shadows: false,
+      animation: false,
+      sceneModePicker: false,
+    });
 
-      // 创建viewer视图
-      const viewer = new Cesium.Viewer('cesiumContainer', {
-        // imageryProvider: arc,
-        // terrainProvider : new Cesium.CesiumTerrainProvider({
-        //   url : Cesium.IonResource.fromAssetId(3956),
-        //   requestVertexNormals : true
-        // }),
-        terrainProvider,
-        homeButton: false,
-        navigationHelpButton: false,
-        geocoder: false,
-        // fullscreenButton: false,
-        baseLayerPicker: false,
-        timeline: false,
-        shouldAnimate: false,
-        shadows: false,
-        animation: false,
-        sceneModePicker: false,
-      });
-
-      // 设置初始视角
+    // 设置默认相机视角
+    const setDefaultView = () => {
       viewer.camera.setView({
-        destination: Cesium.Cartesian3.fromDegrees(117.3052368164, 49.4280128479, 3000),
+        destination: Cesium.Cartesian3.fromDegrees(
+          (lngMin + lngMax) / 2,
+          (latMin + latMax) / 2,
+          10000,
+        ),
         orientation: {
           heading: Cesium.Math.toRadians(0), // 左右角度
           pitch: Cesium.Math.toRadians(-90), // -90为正俯视
           roll: 0.0,
         },
       });
+    };
 
-      // 添加DEM底图
+    // 贴雷达匹配融合后的二维图
+    const addImage = () => {
       viewer.imageryLayers.addImageryProvider(
         new Cesium.SingleTileImageryProvider({
           url: 'http://localhost:80/slicehash/demo/defo.png',
           //url: 'http://localhost:80/slicehash/demo/colorby.png',
-          rectangle: Cesium.Rectangle.fromDegrees(
-            117.27761348385629,
-            49.411345992903364,
-            117.30503052941792,
-            49.43642674163687,
-          ),
+          // 限制雷达贴图区域，会自动将图像拉伸
+          rectangle: Cesium.Rectangle.fromDegrees(lngMin, latMin, lngMax, latMax),
         }),
       );
       // viewer.imageryLayers.addImageryProvider(new Cesium.SingleTileImageryProvider({
@@ -79,7 +84,10 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
       //   rectangle: Cesium.Rectangle.fromDegrees(117.27761348385629, 49.411345992903364,
       //     117.30503052941792, 49.43642674163687),
       // }));
+    };
 
+    // 添加页面内组件
+    const addHelperObj = () => {
       // 添加雷达点位
       viewer.entities.add({
         // name : 'Red box with black outline',
@@ -91,7 +99,7 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
         //   outlineColor : Cesium.Color.BLACK
         // },
         name: 'radar point',
-        position: Cesium.Cartesian3.fromDegrees(117.3052368164, 49.4280128479),
+        position: Cesium.Cartesian3.fromDegrees(longitude, latitude),
         point: {
           pixelSize: 13,
           color: Cesium.Color.RED,
@@ -115,8 +123,12 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
       viewer.entities.add({
         polyline: {
           positions: Cesium.Cartesian3.fromDegreesArray([
-            117.27763989399657, 49.437545209492335, 117.3052368164, 49.4280128479,
-            117.2939262879331, 49.40972240310838,
+            117.27763989399657,
+            49.437545209492335,
+            longitude,
+            latitude,
+            117.2939262879331,
+            49.40972240310838,
           ]),
           clampToGround: true,
           width: 4,
@@ -125,20 +137,10 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
           }),
         },
       });
+    };
 
-      // 获取鼠标经纬度
-      const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
-      handler.setInputAction(function (event: any) {
-        const cartesian = viewer.camera.pickEllipsoid(event.position, viewer.scene.globe.ellipsoid);
-        if (cartesian) {
-          const cartographic = viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
-          const lon = Cesium.Math.toDegrees(cartographic.longitude);
-          const lat = Cesium.Math.toDegrees(cartographic.latitude);
-          console.log(lon, lat);
-        }
-      }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-
-      // 裁剪底图
+    // 裁剪底图
+    const clipping = () => {
       const globe = viewer.scene.globe;
       const position = Cesium.Cartographic.toCartesian(
         Cesium.Cartographic.fromDegrees(117.2913220066371, 49.423086367270114),
@@ -168,16 +170,58 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
         new Cesium.HeadingPitchRange(0.0, -1.2, boundingSphere.radius * 4.0),
       );
       viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
-
-      // 设置viewer全局状态
-      setGlobeViewer(viewer);
     };
-    setCesium();
+
+    const addMouseEvent = () => {
+      // 获取鼠标经纬度
+      const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+      handler.setInputAction(function (event: any) {
+        const cartesian = viewer.camera.pickEllipsoid(event.position, viewer.scene.globe.ellipsoid);
+        if (cartesian) {
+          const cartographic = viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
+          const lon = Cesium.Math.toDegrees(cartographic.longitude);
+          const lat = Cesium.Math.toDegrees(cartographic.latitude);
+          console.log(lon, lat);
+        }
+      }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    };
+
+    // 统一初始化设置
+    setDefaultView();
+    addImage();
+    addHelperObj();
+    clipping();
+    addMouseEvent();
+
+    // 设置viewer全局状态
+    setGlobeViewer(viewer);
   }, []);
+
+  // 获取雷达二维图边界
+  const {
+    imageSpan: { lngMin, lngMax, latMin, latMax },
+  } = radarSpecific;
+
+  // 设置默认相机视角
+  const setDefaultView = (viewer) => {
+    viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(
+        (lngMin + lngMax) / 2,
+        (latMin + latMax) / 2,
+        10000,
+      ),
+      orientation: {
+        heading: Cesium.Math.toRadians(0), // 左右角度
+        pitch: Cesium.Math.toRadians(-90), // -90为正俯视
+        roll: 0.0,
+      },
+    });
+  };
 
   // 每次cesium刷新都运行一次
   if (globeViewer) {
     globeViewer.scene.globe.clippingPlanes.enabled = clipEnable;
+    setDefaultView(globeViewer);
   }
   // useEffect(() => {
   //

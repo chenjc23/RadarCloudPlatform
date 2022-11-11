@@ -146,7 +146,7 @@ const DataAnalyse: React.FC = () => {
         <Col span={19}>
           <div className={styles.cesium}>
             <Button
-              className={styles.b}
+              className={styles.zoomButton}
               icon={showGlobe ? <MinusSquareOutlined /> : <PlusSquareOutlined />}
               onClick={() => {
                 setShowGlobe(!showGlobe);
