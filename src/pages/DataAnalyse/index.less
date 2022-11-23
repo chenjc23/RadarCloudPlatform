@@ -27,11 +27,18 @@
 
 .cesium {
   position: relative;
-  .zoomButton {
+  display: block;
+  .topLayer {
     position: absolute;
     top: 5px;
     left: 5px;
     z-index: 1;
+    // 不允许子元素超出父元素范围
+    max-height: 100%;
+    overflow: hidden;
     opacity: 0.8;
+    & > * {
+      margin: 2px;
+    }
   }
 }

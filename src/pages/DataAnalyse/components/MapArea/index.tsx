@@ -1,6 +1,6 @@
 import React from 'react';
 //import styles from './index.less';
-import { useState, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 // Cesium 相关配置
 window.CESIUM_BASE_URL = '/static/cesium';
@@ -10,15 +10,18 @@ Cesium.Ion.defaultAccessToken =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhOGM1Y2MyYy0zNzhjLTQwN2QtYjkyOC0zZDYzN' +
   'jI5NTEyNTAiLCJpZCI6MTA5NzUwLCJpYXQiOjE2NjQ1MjM0NDZ9.gPRCXltXZgZxTZDdtToSvyxAdRfOjNQRvUdWHCyYXDQ';
 
-import { radarSpecific } from '@/constant/radarSpecific';
+import { dawangshan as radarSpecific } from '@/constant/radarSpecific';
+import { dawangshan as layerSpecific } from '@/constant/layerSpecific';
 
 type MapAreaProps = {
   clipEnable?: boolean;
+  resetCamera?: boolean; // 触发相机复位
 };
 
 const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
-  const [globeViewer, setGlobeViewer] = useState<any>();
-  const { clipEnable } = props;
+  //const [globeViewer, setGlobeViewer] = useState<any>();
+  const { clipEnable = true, resetCamera = true } = props;
+  const globeViewer = useRef<Cesium.Viewer>();
 
   // 仅挂载后运行一次cesium初始化
   useEffect(() => {
@@ -27,10 +30,13 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
       radarLocation: { longitude, latitude },
       imageSpan: { lngMin, lngMax, latMin, latMax },
     } = radarSpecific;
+    const { terrainUrl, defoUrl } = layerSpecific;
+
+    const [lngCenter, latCenter] = [(lngMin + lngMax) / 2, (latMin + latMax) / 2];
 
     // 设置地形Provider, 即DEM底图
     const terrainProvider = new Cesium.CesiumTerrainProvider({
-      url: 'http://localhost:80/slicehash/demo',
+      url: terrainUrl,
     });
     // 创建viewer视图
     const viewer = new Cesium.Viewer('cesiumContainer', {
@@ -55,11 +61,7 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
     // 设置默认相机视角
     const setDefaultView = () => {
       viewer.camera.setView({
-        destination: Cesium.Cartesian3.fromDegrees(
-          (lngMin + lngMax) / 2,
-          (latMin + latMax) / 2,
-          10000,
-        ),
+        destination: Cesium.Cartesian3.fromDegrees(lngCenter, latCenter, 8000),
         orientation: {
           heading: Cesium.Math.toRadians(0), // 左右角度
           pitch: Cesium.Math.toRadians(-90), // -90为正俯视
@@ -72,7 +74,7 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
     const addImage = () => {
       viewer.imageryLayers.addImageryProvider(
         new Cesium.SingleTileImageryProvider({
-          url: 'http://localhost:80/slicehash/demo/defo.png',
+          url: defoUrl,
           //url: 'http://localhost:80/slicehash/demo/colorby.png',
           // 限制雷达贴图区域，会自动将图像拉伸
           rectangle: Cesium.Rectangle.fromDegrees(lngMin, latMin, lngMax, latMax),
@@ -86,9 +88,7 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
       // }));
     };
 
-    // 添加页面内组件
-    const addHelperObj = () => {
-      // 添加雷达点位
+    const addRadarPoint = () => {
       viewer.entities.add({
         // name : 'Red box with black outline',
         // position: Cesium.Cartesian3.fromDegrees(117.3052368164, 49.4280128479, 1000),
@@ -118,7 +118,9 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
         //   verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
         // },
       });
+    };
 
+    const addScaleLine = () => {
       // 添加雷达扫描边界
       viewer.entities.add({
         polyline: {
@@ -143,7 +145,7 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
     const clipping = () => {
       const globe = viewer.scene.globe;
       const position = Cesium.Cartographic.toCartesian(
-        Cesium.Cartographic.fromDegrees(117.2913220066371, 49.423086367270114),
+        Cesium.Cartographic.fromDegrees(lngCenter, latCenter),
       );
       const distance = 1900.0;
       const boundingSphere = new Cesium.BoundingSphere(position, distance);
@@ -165,11 +167,11 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
       globe.showSkirts = false;
 
       // 设置相机视角
-      viewer.camera.viewBoundingSphere(
-        boundingSphere,
-        new Cesium.HeadingPitchRange(0.0, -1.2, boundingSphere.radius * 4.0),
-      );
-      viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+      // viewer.camera.viewBoundingSphere(
+      //   boundingSphere,
+      //   new Cesium.HeadingPitchRange(0.0, -1.2, boundingSphere.radius * 4.0),
+      // );
+      // viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
     };
 
     const addMouseEvent = () => {
@@ -179,9 +181,11 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
         const cartesian = viewer.camera.pickEllipsoid(event.position, viewer.scene.globe.ellipsoid);
         if (cartesian) {
           const cartographic = viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
+          // const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
           const lon = Cesium.Math.toDegrees(cartographic.longitude);
           const lat = Cesium.Math.toDegrees(cartographic.latitude);
-          console.log(lon, lat);
+          // 高度需要通过globe对象另外通过经纬求
+          console.log(lon, lat, viewer.scene.globe.getHeight(cartographic));
         }
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
     };
@@ -189,43 +193,48 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
     // 统一初始化设置
     setDefaultView();
     addImage();
-    addHelperObj();
+    addRadarPoint();
+    // addScaleLine();
     clipping();
     addMouseEvent();
 
     // 设置viewer全局状态
-    setGlobeViewer(viewer);
+    // setGlobeViewer(viewer);
+    globeViewer.current = viewer;
   }, []);
 
-  // 获取雷达二维图边界
-  const {
-    imageSpan: { lngMin, lngMax, latMin, latMax },
-  } = radarSpecific;
-
-  // 设置默认相机视角
-  const setDefaultView = (viewer) => {
-    viewer.camera.setView({
-      destination: Cesium.Cartesian3.fromDegrees(
-        (lngMin + lngMax) / 2,
-        (latMin + latMax) / 2,
-        10000,
-      ),
-      orientation: {
-        heading: Cesium.Math.toRadians(0), // 左右角度
-        pitch: Cesium.Math.toRadians(-90), // -90为正俯视
-        roll: 0.0,
-      },
-    });
-  };
-
   // 每次cesium刷新都运行一次
-  if (globeViewer) {
-    globeViewer.scene.globe.clippingPlanes.enabled = clipEnable;
-    setDefaultView(globeViewer);
-  }
-  // useEffect(() => {
-  //
-  // }, [clipEnable]);
+
+  useEffect(() => {
+    if (globeViewer.current) {
+      globeViewer.current.scene.globe.clippingPlanes.enabled = clipEnable;
+      // flytoDefaultView(globeViewer);
+    }
+  }, [clipEnable]);
+
+  useEffect(() => {
+    if (globeViewer.current) {
+      const viewer = globeViewer.current;
+      // 获取雷达二维图边界
+      const {
+        imageSpan: { lngMin, lngMax, latMin, latMax },
+      } = radarSpecific;
+      // 设置默认相机视角
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(
+          (lngMin + lngMax) / 2,
+          (latMin + latMax) / 2,
+          10000,
+        ),
+        orientation: {
+          heading: Cesium.Math.toRadians(0), // 左右角度
+          pitch: Cesium.Math.toRadians(-90), // -90为正俯视
+          roll: 0.0,
+        },
+        duration: 1.5,
+      });
+    }
+  }, [resetCamera]);
 
   return <div id="cesiumContainer" />;
 };

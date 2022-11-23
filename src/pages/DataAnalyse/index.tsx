@@ -3,10 +3,16 @@ import { PageContainer, ProCard } from '@ant-design/pro-components';
 import { Row, Col, Radio, Switch, Select, DatePicker, Table, Button } from 'antd';
 import type { RadioChangeEvent } from 'antd';
 import { useState } from 'react';
-import { FieldTimeOutlined, PlusSquareOutlined, MinusSquareOutlined } from '@ant-design/icons';
+import {
+  FieldTimeOutlined,
+  PlusSquareOutlined,
+  MinusSquareOutlined,
+  CameraOutlined,
+} from '@ant-design/icons';
 
 import MapArea from './components/MapArea';
 import DataAnalyseCharts from './components/DataAnalyseCharts';
+import ColorBar from '@/components/ColorBar';
 
 //import type { GnotePoint, DistancePoint } from "@/models/supervisePoint";
 import styles from './index.less';
@@ -46,6 +52,8 @@ const DataAnalyse: React.FC = () => {
   const [showGlobe, setShowGlobe] = useState(false);
   const [showTasks, setShowTasks] = useState(false);
   const [superviseType, setSuperviseType] = useState<'gnote' | 'distance'>('gnote');
+
+  const [flytoTrigger, setFlytoTrigger] = useState<boolean>(false);
 
   const handleImgTypeChange = (e: RadioChangeEvent) => {
     if (e.target.value === 2) {
@@ -145,14 +153,25 @@ const DataAnalyse: React.FC = () => {
         </Col>
         <Col span={19}>
           <div className={styles.cesium}>
-            <Button
-              className={styles.zoomButton}
-              icon={showGlobe ? <MinusSquareOutlined /> : <PlusSquareOutlined />}
-              onClick={() => {
-                setShowGlobe(!showGlobe);
-              }}
-            />
-            <MapArea clipEnable={!showGlobe} />
+            <div className={styles.topLayer}>
+              <Button
+                icon={showGlobe ? <MinusSquareOutlined /> : <PlusSquareOutlined />}
+                style={{ zoom: '130%' }}
+                onClick={() => {
+                  setShowGlobe(!showGlobe);
+                }}
+              />
+              <Button
+                icon={<CameraOutlined />}
+                style={{ zoom: '130%' }}
+                onClick={() => {
+                  setFlytoTrigger(!flytoTrigger);
+                }}
+              />
+              <ColorBar />
+            </div>
+
+            <MapArea clipEnable={!showGlobe} resetCamera={flytoTrigger} />
           </div>
           <DataAnalyseCharts />
         </Col>
