@@ -2,12 +2,17 @@ const express = require('express');
 const bodyParser = require('body-parser'); // 解析请求所需模块
 const expressSession = require('express-session');
 const redis = require('redis');
-const { redisConfig } = require('./config/config.js');
+const {
+  redisConfig: { url },
+} = require('./config/config.js');
 const RedisStore = require('connect-redis')(expressSession);
 
 // 创建redis连接配置
-const redisClient = redis.createClient(redisConfig);
-redisClient.connect().then(console.log).catch(console.error);
+const redisClient = redis.createClient({ url, legacyMode: true }); // legacyMode设置是关键，否则配置失效
+redisClient
+  .connect()
+  .then(() => console.log('Redis client connected successfully'))
+  .catch((err) => console.error('Redis client connection failed', err));
 
 // 创建server类
 class PlatformServer {
@@ -25,7 +30,7 @@ class PlatformServer {
       res.setHeader('Access-Control-Allow-Credentials', 'true');
       // 若为CORS预检请求，设置跨域相关首部字段
       if (req.method === 'OPTIONS') {
-        console.log('Accept a preflight!');
+        console.log('!Accept a preflight!');
 
         res.setHeader('Access-Control-Allow-Origin', req.get('Origin'));
         res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE, PUT');
@@ -46,7 +51,7 @@ class PlatformServer {
         saveUninitialized: true, // 如果原先没有session那么就设置，否则不设置(推荐true)
         rolling: true, // 每次请求更新有效时长
         cookie: {
-          domain: '.mianshiya.com',
+          domain: '.radarPlatform',
           // 全局设置cookie,就是访问随便api就会设置cookie，也可以在登录的路由下单独设置
           maxAge: 1000 * 60 * 60 * 24 * 15, // 15 天后过期
           httpOnly: true, // 是否允许客户端修改cookie,(默认true 不能被修改)
@@ -70,8 +75,11 @@ class PlatformServer {
         );
         result = await targetFunction(content, req, res);
         console.log(
-          `req end path = ${req.path}, clientIp = ${requestClientIp}, params = ${params},
-           costTime = ${new Date().getTime() - startTime}`,
+          `req end path = ${
+            req.path
+          }, clientIp = ${requestClientIp}, params = ${params}, costTime = ${
+            new Date().getTime() - startTime
+          }`,
         );
       } catch (e) {
         console.error(
@@ -87,6 +95,8 @@ class PlatformServer {
   // server监听函数
   listen(port, ...args) {
     this.server.listen(port, ...args);
-    console.log(`server start at ${port}, env = ${process.env.NODE_ENV}`);
+    console.log(`==== server start at ${port}, env = ${process.env.NODE_ENV} ====`);
   }
 }
+
+module.exports.PlatformServer = PlatformServer;

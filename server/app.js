@@ -1,20 +1,17 @@
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+// app.js进行数据库的连接配置
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const {
+  mongodbConfig: { url, dbName },
+} = require('./config/config');
+const { MongoClient } = require('mongodb');
 
-var app = express();
+// 连接MongoDB server
+const client = new MongoClient(url);
+client
+  .connect()
+  .then(() => console.log('Mongodb client connected successfully'))
+  .catch((err) => console.error('Mongodb client connection failed', err));
+// console.log('Mongodb client connected successfully');
+const db = client.db(dbName);
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-
-module.exports = app;
+module.exports = db;
