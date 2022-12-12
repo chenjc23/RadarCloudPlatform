@@ -1,0 +1,12 @@
+{
+  "name": "radarserver",
+  "version": "1.0.0",
+  "description": "server for radar data acquision",
+  "license": "ISC",
+  "author": "jc chen",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

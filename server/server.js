@@ -28,16 +28,13 @@ class PlatformServer {
       // 当请求的浏览器的credentials设置为true时，是否能读取响应体
       // google浏览器需要设置该首部
       res.setHeader('Access-Control-Allow-Credentials', 'true');
-      // 若为CORS预检请求，设置跨域相关首部字段
-      if (req.method === 'OPTIONS') {
-        console.log('!Accept a preflight!');
-
-        res.setHeader('Access-Control-Allow-Origin', req.get('Origin'));
-        res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE, PUT');
-        res.setHeader('Access-Control-Allow-Headers', req.get('Access-Control-Request-Headers'));
-        res.end();
-        return;
-      }
+      // 设置跨域相关首部字段
+      res.setHeader('Access-Control-Allow-Origin', req.get('Origin') || '*');
+      res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE, PUT');
+      res.setHeader(
+        'Access-Control-Allow-Headers',
+        req.get('Access-Control-Request-Headers') || '*',
+      );
       // 传递至下一中间件处理
       next();
     });

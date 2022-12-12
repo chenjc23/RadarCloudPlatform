@@ -63,6 +63,12 @@ export default [
     hideInBreadcrumb: true,
   },
   {
+    name: '临时页面',
+    path: '/temp',
+    component: './Temp',
+    icon: 'dashboard',
+  },
+  {
     path: '/',
     redirect: '/welcome',
   },

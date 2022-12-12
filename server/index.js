@@ -11,5 +11,10 @@ const db = require('./app');
 // demo
 server.setRoute('/demo/test', require('./service/demo'));
 
+// device
+server.setRoute('/device/setParams', require('./service/device/setParams'));
+server.setRoute('/device/tcpConnect', require('./service/device/tcpConnect'));
+server.setRoute('/device/staticRead', require('./service/device/staticRead'));
+server.setRoute('/device/readBinaryPerSecond', require('./service/device/readBinaryPerSecond'));
 // server启动
 server.listen(3000);

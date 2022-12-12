@@ -7,7 +7,8 @@ import type { RunTimeLayoutConfig } from '@umijs/max';
 import { history, Link } from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
-import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
+//import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
+import './plugins/axios';
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
@@ -28,7 +29,7 @@ export async function getInitialState(): Promise<{
       // });
       // return msg.data;
       // 此处全局提供默认用户
-      return {name: "admin"};
+      return { name: 'admin' };
     } catch (error) {
       history.push(loginPath);
     }
