@@ -11,7 +11,7 @@ class RadarDataSocket {
     this.readFinish = true;
 
     this.socket.on('error', (err) => {
-      console.error('===socket错误：', err);
+      console.error('===socket err：', err);
     });
   }
 
@@ -27,12 +27,6 @@ class RadarDataSocket {
         console.log(`===与雷达-->${host}:${port} 的TCP连接已建立`);
       },
     );
-    // 设置最大的空闲时间
-    // this.socket.setTimeout(4000);
-    // this.socket.on('timeout', () => {
-    //   console.log('===雷达连接超时');
-    //   this.socket.destroy();
-    // });
   }
 
   // 设置雷达参数
@@ -60,15 +54,11 @@ class RadarDataSocket {
           // // 利用nodejs的pipe功能，直接将socket输入流与文件输出流对接（便捷至极）
           // this.socket.pipe(binOutputFlow);
           // console.log(`===采集数据保存的目标文件：${fileName}`);
-          resolve();
+          resolve(true);
         } else reject('雷达静止采集命令发送失败');
       });
       setTimeout(() => reject('雷达静止采集命令发送失败'), 2000);
     });
-  }
-
-  readTargetSize(size) {
-    return this.socket.read(size);
   }
 
   isOpen() {

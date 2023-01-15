@@ -14,7 +14,6 @@ module.exports = async (content, req, res) => {
     });
     setTimeout(() => {
       if (radarSocket.isOpen()) {
-        console.log('===雷达连接成功！');
         resolve(true);
       } else {
         console.log('===雷达连接超时！');

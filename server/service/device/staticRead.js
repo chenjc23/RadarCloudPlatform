@@ -36,12 +36,17 @@ module.exports = async (content, req, res) => {
     return { message: info };
   }
 
-  let { pulseWidth, sampleFreq, sampleTime, prf } = content;
-  pulseWidth = Number(pulseWidth) / 10 ** 3;
-  sampleFreq = Number(sampleFreq) * 10 ** 6;
-  sampleTime = Number(sampleTime);
+  let { startFreq, stopFreq, pulseWidth, prf, channelGain, sampleFreq, sampleTime } = content;
+  startFreq = Number(startFreq);
+  stopFreq = Number(stopFreq);
+  pulseWidth = Number(pulseWidth);
   prf = Number(prf);
-  const Nr = Math.round(pulseWidth * sampleFreq); // 距离线上的采样点数
+  channelGain = Number(channelGain);
+  sampleFreq = Number(sampleFreq);
+  sampleTime = Number(sampleTime);
+
+  const Nr = Math.round((pulseWidth / 10 ** 3) * sampleFreq * 10 ** 6); // 距离线上的采样点数
+  const Na = Math.round(sampleTime * prf); // 方位采样总点数
   const bytes_per_second = Math.floor(prf * Nr * 2); // 每秒需要接收的字节数
   const whole_bytes = Math.floor(sampleTime) * bytes_per_second;
 
@@ -52,31 +57,55 @@ module.exports = async (content, req, res) => {
   radarSocket.dataBuf = new Uint8Array(0);
   radarSocket.readFinish = false;
 
-  // 发送静止采集指令
-  await radarSocket.staticReadOrder(new Uint8Array(buf_ADC));
+  // 构造10个文件头变量并写入buffer
+  const va = 0.1; // 方位速度（占位？）
+  const lamda = (3 * 10 ** 8) / ((startFreq * 10 ** 6) / 2 + (stopFreq * 10 ** 6) / 2);
 
-  // 查询当前文件最大ID
+  const var_all_bytes = 7 * 64 + 2 * 32 + 64; // 576 bytes
+  const headBuf = Buffer.alloc(var_all_bytes);
+  let offset = 0;
+  offset = headBuf.writeDoubleLE(startFreq, offset);
+  offset = headBuf.writeDoubleLE(stopFreq, offset);
+  offset = headBuf.writeDoubleLE(pulseWidth, offset);
+  offset = headBuf.writeDoubleLE(prf, offset);
+  offset = headBuf.writeDoubleLE(Number(channelGain), offset);
+  offset = headBuf.writeDoubleLE(sampleFreq, offset);
+  offset = headBuf.writeDoubleLE(va, offset);
+  offset = headBuf.writeInt32LE(Nr, offset);
+  offset = headBuf.writeInt32LE(Na, offset);
+  offset = headBuf.writeDoubleLE(lamda, offset);
+
+  // 查询当前文件最大ID, 构建新文件名
   const maxFileId = await fetchMaxFileId();
   console.log(`===当前最大文件ID：${maxFileId}`);
-  // 创建文件输出流
-  const fileName = `radarData${maxFileId + 1}.bin`;
+  const fileName = `./radarData${maxFileId + 1}.dat`;
+  // 创建文件输出流并存入头文件
   const binOutputFlow = fs.createWriteStream(fileName, { flags: 'a' });
+  binOutputFlow.write(headBuf);
 
-  // 监听雷达接口数据，边接收边写文件且写缓存（供前端轮询访问）
-  radarSocket.socket.on('data', (data) => {
-    radarSocket.dataBuf = Buffer.concat([radarSocket.dataBuf, data]);
-    binOutputFlow.write(data);
-    if (radarSocket.getByteLength() >= whole_bytes) {
-      radarSocket.readFinish = true;
-    }
-  });
-  // 数据库插入新文件ID
+  try {
+    // 发送静止采集指令
+    await radarSocket.staticReadOrder(new Uint8Array(buf_ADC));
+    // 监听雷达接口数据，边接收边写文件且写缓存（供前端轮询访问）
+    let callback = (data) => {
+      // 输出到文件流
+      binOutputFlow.write(data);
+      radarSocket.dataBuf = Buffer.concat([radarSocket.dataBuf, data]);
+
+      if (radarSocket.getByteLength() >= whole_bytes) {
+        // 移除该轮数据监听（防止影响下一次的数据监听）
+        radarSocket.socket.removeListener('data', callback);
+        radarSocket.readFinish = true;
+      }
+    };
+    radarSocket.socket.on('data', callback);
+  } catch (e) {
+    // 若采集错误则删除文件
+    fs.rm(fileName, (e) => console.error(`删除文件${fileName}错误：`, e));
+    throw e;
+  }
+  // 无错误则-->数据库插入新文件ID
   await addFileId(maxFileId + 1);
   console.log(`===数据库新增文件ID：${maxFileId + 1}`);
-
-  // 利用nodejs的pipe功能，直接将socket输入流与文件输出流对接（便捷至极）
-  // console.log(await radarSocket.readTargetSize(bytes_per_second));
-  // radarSocket.socket.pipe(binOutputFlow);
-  // console.log(`===采集数据保存的目标文件：${fileName}`);
   return true;
 };

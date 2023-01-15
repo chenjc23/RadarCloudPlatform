@@ -36,7 +36,7 @@ const Temp: React.FC = () => {
       setTimeout(async () => {
         const result = await readBinaryPerSecond({ ...paramsInRadar, offset });
         if (result === false) {
-          message.error('雷达dataBuf已读取完全');
+          message.warn('雷达dataBuf已读取完全');
           setReadSign({ readCount: 0, offset: 0 });
         } else {
           setData(result.data);
