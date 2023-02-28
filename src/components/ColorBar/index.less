@@ -1,24 +1,24 @@
 .outline {
   position: relative;
-  top: 70px;
-  width: 80px;
-  max-width: 200px;
-  height: 640px;
-  overflow: hidden;
+  top: 60px;
+  width: fit-content;
   background-color: darkgray;
-  //left: 10px;
-  & > * {
-    display: block;
-  }
+  border: 5px solid darkblue;
 }
 
 .fullBar {
   margin-top: 10px;
-  color: #444444;
-  font: 12pt Arial;
+  font: 11pt Arial;
 }
 
 .colorBar {
-  width: 22px;
-  height: 480px;
+  height: 400px;
+}
+
+.numberBar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  margin-left: 1px;
 }

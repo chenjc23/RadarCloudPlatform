@@ -8,6 +8,8 @@ _roadhog-api-doc
 
 /public/static
 
+/extern
+
 # production
 /dist
 

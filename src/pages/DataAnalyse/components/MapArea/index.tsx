@@ -1,6 +1,6 @@
 import React from 'react';
 //import styles from './index.less';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // Cesium 相关配置
 window.CESIUM_BASE_URL = '/static/cesium';
@@ -11,16 +11,17 @@ Cesium.Ion.defaultAccessToken =
   'jI5NTEyNTAiLCJpZCI6MTA5NzUwLCJpYXQiOjE2NjQ1MjM0NDZ9.gPRCXltXZgZxTZDdtToSvyxAdRfOjNQRvUdWHCyYXDQ';
 
 import { dawangshan as radarSpecific } from '@/constant/radarSpecific';
-import { dawangshan as layerSpecific } from '@/constant/layerSpecific';
+import { tempTarget as layerSpecific } from '@/constant/layerSpecific';
 
 type MapAreaProps = {
   clipEnable?: boolean;
   resetCamera?: boolean; // 触发相机复位
+  imgName?: string;
 };
 
 const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
   //const [globeViewer, setGlobeViewer] = useState<any>();
-  const { clipEnable = true, resetCamera = true } = props;
+  const { clipEnable = true, resetCamera = true, imgName } = props;
   const globeViewer = useRef<Cesium.Viewer>();
 
   // 仅挂载后运行一次cesium初始化
@@ -71,21 +72,15 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
     };
 
     // 贴雷达匹配融合后的二维图
-    const addImage = () => {
+    const addImage = (imgUrl: string) => {
       viewer.imageryLayers.addImageryProvider(
         new Cesium.SingleTileImageryProvider({
-          url: defoUrl,
+          url: imgUrl,
           //url: 'http://localhost:80/slicehash/demo/colorby.png',
           // 限制雷达贴图区域，会自动将图像拉伸
           rectangle: Cesium.Rectangle.fromDegrees(lngMin, latMin, lngMax, latMax),
         }),
       );
-      // viewer.imageryLayers.addImageryProvider(new Cesium.SingleTileImageryProvider({
-      //   //url: 'http://localhost:80/slicehash/demo/defo.png',
-      //   url: 'http://localhost:80/slicehash/demo/test_defo.png',
-      //   rectangle: Cesium.Rectangle.fromDegrees(117.27761348385629, 49.411345992903364,
-      //     117.30503052941792, 49.43642674163687),
-      // }));
     };
 
     const addRadarPoint = () => {
@@ -192,7 +187,11 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
 
     // 统一初始化设置
     setDefaultView();
-    addImage();
+
+    if (imgName) {
+      addImage(defoUrl + imgName);
+    }
+
     addRadarPoint();
     // addScaleLine();
     clipping();
@@ -235,6 +234,24 @@ const MapArea: React.FC<MapAreaProps> = (props: MapAreaProps) => {
       });
     }
   }, [resetCamera]);
+
+  useEffect(() => {
+    if (globeViewer.current && imgName) {
+      const viewer = globeViewer.current;
+      const {
+        imageSpan: { lngMin, lngMax, latMin, latMax },
+      } = radarSpecific;
+      const { defoUrl } = layerSpecific;
+      viewer.imageryLayers.addImageryProvider(
+        new Cesium.SingleTileImageryProvider({
+          url: defoUrl + imgName,
+          //url: 'http://localhost:80/slicehash/demo/colorby.png',
+          // 限制雷达贴图区域，会自动将图像拉伸
+          rectangle: Cesium.Rectangle.fromDegrees(lngMin, latMin, lngMax, latMax),
+        }),
+      );
+    }
+  }, [imgName]);
 
   return <div id="cesiumContainer" />;
 };

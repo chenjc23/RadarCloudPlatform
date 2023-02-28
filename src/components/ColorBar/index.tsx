@@ -27,12 +27,11 @@ const NumberBar: React.FC<NumBarProps> = (props) => {
   }
   arr.reverse();
   return (
-    <Space direction={'vertical'} size={30} style={{ margin: '35px 0 35px 3px' }}>
-      {/*{new Array(9).fill(null).map((_, index) => ()}*/}
+    <div className={styles.numberBar}>
       {arr.map((val) => (
-        <span key={val}>{val}</span>
+        <div key={val}>{val}</div>
       ))}
-    </Space>
+    </div>
   );
 };
 
@@ -81,14 +80,10 @@ const ColorBar: React.FC<ColorBarProps> = (props) => {
       </Popover>
       <div className={styles.fullBar}>
         <div>{scale.maxNum}mm</div>
-        <Row>
-          <Col>
-            <Image className={styles.colorBar} src="/pic/colorBar.png" preview={false} />
-          </Col>
-          <Col>
-            <NumberBar scale={scale} />
-          </Col>
-        </Row>
+        <div style={{ display: 'flex' }}>
+          <Image className={styles.colorBar} src="/pic/colorBar.png" preview={false} />
+          <NumberBar scale={scale} />
+        </div>
         <div>{scale.minNum}mm</div>
       </div>
     </div>

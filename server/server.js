@@ -76,11 +76,11 @@ class PlatformServer {
             req.path
           }, clientIp = ${requestClientIp}, params = ${params}, costTime = ${
             new Date().getTime() - startTime
-          }`,
+          }\n`,
         );
       } catch (e) {
         console.error(
-          `req error path = ${req.path}, clientIp = ${requestClientIp}, params = ${params}`,
+          `req error path = ${req.path}, clientIp = ${requestClientIp}, params = ${params}\n`,
           e,
         );
       }

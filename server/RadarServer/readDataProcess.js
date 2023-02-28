@@ -1,5 +1,4 @@
 const net = require('net');
-const fs = require('fs');
 const {
   radarNetConfig: { host, port },
 } = require('./config/config');

@@ -16,5 +16,9 @@ server.setRoute('/device/setParams', require('./service/device/setParams'));
 server.setRoute('/device/tcpConnect', require('./service/device/tcpConnect'));
 server.setRoute('/device/staticRead', require('./service/device/staticRead'));
 server.setRoute('/device/readBinaryPerSecond', require('./service/device/readBinaryPerSecond'));
+
+// image
+server.setRoute('/image/fetch', require('./service/image/fetchSarImage'));
+
 // server启动
 server.listen(3000);

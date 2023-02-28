@@ -3,16 +3,11 @@ import { PageContainer, ProCard } from '@ant-design/pro-components';
 import { Row, Col, Radio, Switch, Select, DatePicker, Table, Button } from 'antd';
 import type { RadioChangeEvent } from 'antd';
 import { useState } from 'react';
-import {
-  FieldTimeOutlined,
-  PlusSquareOutlined,
-  MinusSquareOutlined,
-  CameraOutlined,
-} from '@ant-design/icons';
+import { FieldTimeOutlined } from '@ant-design/icons';
 
-import MapArea from './components/MapArea';
+import CesiumWidget from './CesiumWidget';
+
 import DataAnalyseCharts from './components/DataAnalyseCharts';
-import ColorBar from '@/components/ColorBar';
 
 //import type { GnotePoint, DistancePoint } from "@/models/supervisePoint";
 import styles from './index.less';
@@ -49,17 +44,20 @@ const distanceItems = [
 
 const DataAnalyse: React.FC = () => {
   const [showDenoise, setShowDenoise] = useState(false);
-  const [showGlobe, setShowGlobe] = useState(false);
-  const [showTasks, setShowTasks] = useState(false);
-  const [superviseType, setSuperviseType] = useState<'gnote' | 'distance'>('gnote');
 
-  const [flytoTrigger, setFlytoTrigger] = useState<boolean>(false);
+  const [imageType, setImageType] = useState<'intensity' | 'defo'>('defo');
+  const [displayMode, setDisplayMode] = useState<'realtime' | 'history'>('realtime');
+  const [batchId, setBatchId] = useState<any>(null);
+
+  const [superviseType, setSuperviseType] = useState<'gnote' | 'distance'>('gnote');
 
   const handleImgTypeChange = (e: RadioChangeEvent) => {
     if (e.target.value === 2) {
       setShowDenoise(true);
+      setImageType('defo');
     } else {
       setShowDenoise(false);
+      setImageType('intensity');
     }
   };
 
@@ -71,11 +69,19 @@ const DataAnalyse: React.FC = () => {
     }
   };
 
+  const handleDisplayModeToggle = (checked: boolean) => {
+    const currentMode = checked ? 'history' : 'realtime';
+    setDisplayMode(currentMode);
+  };
+
   return (
     <PageContainer header={{ title: '', breadcrumb: {} }}>
       <Row>
         <Col span={5}>
           <ProCard split="horizontal">
+            <ProCard title="系统操作">
+              <Button>读取图像</Button>
+            </ProCard>
             <ProCard title="系统状态">
               <Radio.Group value={1}>
                 <div className={styles.radioGroup}>
@@ -90,7 +96,7 @@ const DataAnalyse: React.FC = () => {
               <div>
                 <span>图像类型:</span>
                 <Radio.Group
-                  defaultValue={1}
+                  defaultValue={2}
                   optionType="button"
                   buttonStyle="solid"
                   onChange={handleImgTypeChange}
@@ -117,20 +123,26 @@ const DataAnalyse: React.FC = () => {
                 <span>当前模式:</span>
                 <Switch
                   className={styles.modelSwitch}
-                  onChange={(checked) => setShowTasks(checked)}
+                  onChange={handleDisplayModeToggle}
                   checkedChildren="历史图像"
                   unCheckedChildren="实时图像"
                   defaultChecked={false}
                 />
               </div>
-              {showTasks && (
+              {displayMode === 'history' && (
                 <div>
                   <span>
                     <FieldTimeOutlined />
                     任务批次:
                   </span>
                   <Select placeholder="选择一个批次" />
-                  <DatePicker.RangePicker showTime={{ format: 'HH:mm' }} format="MM-DD HH:mm" />
+                  <DatePicker.RangePicker
+                    showTime={{ format: 'HH:mm' }}
+                    format="MM-DD HH:mm"
+                    onOk={(value: any) => {
+                      console.log(new Date(value[0]).toLocaleString());
+                    }}
+                  />
                 </div>
               )}
             </ProCard>
@@ -152,27 +164,7 @@ const DataAnalyse: React.FC = () => {
           </ProCard>
         </Col>
         <Col span={19}>
-          <div className={styles.cesium}>
-            <div className={styles.topLayer}>
-              <Button
-                icon={showGlobe ? <MinusSquareOutlined /> : <PlusSquareOutlined />}
-                style={{ zoom: '130%' }}
-                onClick={() => {
-                  setShowGlobe(!showGlobe);
-                }}
-              />
-              <Button
-                icon={<CameraOutlined />}
-                style={{ zoom: '130%' }}
-                onClick={() => {
-                  setFlytoTrigger(!flytoTrigger);
-                }}
-              />
-              <ColorBar />
-            </div>
-
-            <MapArea clipEnable={!showGlobe} resetCamera={flytoTrigger} />
-          </div>
+          <CesiumWidget imageType={imageType} displayMode={displayMode} batchId={batchId} />
           <DataAnalyseCharts />
         </Col>
       </Row>
