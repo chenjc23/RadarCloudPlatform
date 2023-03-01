@@ -80,7 +80,7 @@ class PlatformServer {
         );
       } catch (e) {
         console.error(
-          `req error path = ${req.path}, clientIp = ${requestClientIp}, params = ${params}\n`,
+          `req error path = ${req.path}, clientIp = ${requestClientIp}, params = ${params} err: `,
           e,
         );
       }

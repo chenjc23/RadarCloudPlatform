@@ -1,4 +1,4 @@
-const { RadarDataSocket } = require('./readDataProcess');
+const { RadarDataSocket } = require('./RadarDataSocket');
 
 const radarSocket = new RadarDataSocket();
 

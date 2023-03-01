@@ -43,3 +43,14 @@ export const dawangshan = {
     latMax: 28.0644336660566,
   },
 };
+
+export const sysu = {
+  radarLocation: {
+    // longitude: 112.89267163,
+    // latitude: 28.06194738,
+    longitude: 113.9598,
+    latitude: 22.803681,
+    // height: 54.8,
+    height: 51.44620932225248,
+  },
+};
