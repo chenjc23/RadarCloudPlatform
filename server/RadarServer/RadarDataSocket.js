@@ -2,6 +2,8 @@ const net = require('net');
 const {
   radarNetConfig: { host, port },
 } = require('./config/config');
+const radarSocket = require('./index');
+const subApertureImaging = require('../core/subApertureImaging');
 
 class RadarDataSocket {
   constructor() {
@@ -15,30 +17,26 @@ class RadarDataSocket {
   }
 
   // 向雷达发送连接请求
-  async connectRadar() {
+  async connectRadar(callback) {
     // 监测socket是否已连接
     if (this.socket.readyState === 'open' || this.socket.readyState === 'writeOnly')
-      return Promise.resolve();
+      callback(null, true);
     // 若未连接则发起连接
-    return new Promise((resolve) => {
-      this.socket.connect(
-        // 设置雷达网络IP和端口
-        { host, port },
-        () => {
-          console.log(`===与雷达-->${host}:${port} 的TCP连接已建立`);
-          resolve();
-        },
-      );
-    });
+    this.socket.connect(
+      // 设置雷达网络IP和端口
+      { host, port },
+      () => {
+        console.log(`===与雷达-->${host}:${port} 的TCP连接已建立`);
+        callback(null);
+      },
+    );
   }
 
   // 设置雷达参数
-  async setWorkParams(buf) {
-    return new Promise((resolve) => {
-      this.socket.write(buf, () => {
-        console.log(`===已成功向雷达发送参数设置指令：${buf}`);
-        resolve();
-      });
+  async setWorkParams(buf, callback) {
+    this.socket.write(buf, () => {
+      console.log(`===已成功向雷达发送参数设置指令：${buf}`);
+      callback(null);
     });
   }
 
@@ -60,6 +58,29 @@ class RadarDataSocket {
         // console.log(`===采集数据保存的目标文件：${fileName}`);
       });
     });
+  }
+
+  // 指示雷达进行单次扫描
+  async orderSingleScanning(buf, bytesTotal, callback) {
+    // 串口写采集指令
+    this.socket.write(buf);
+    // cleanup socket
+    this.resetState();
+    // socket监听
+    this.socket.on('data', (data) => {
+      this.dataBuf = Buffer.concat([this.dataBuf, data]);
+      if (this.dataBuf.byteLength >= bytesTotal) {
+        console.log(`===单次采集完成，回波数据大小：${bytesTotal} bytes.`);
+        callback(null);
+      }
+    });
+  }
+
+  resetState() {
+    // 清空dataBuf
+    this.dataBuf = new Uint8Array(0);
+    // 移除之前的数据监听器
+    this.socket.removeAllListeners('data');
   }
 
   isOpen() {

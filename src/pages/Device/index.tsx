@@ -53,7 +53,7 @@ const Device: React.FC = () => {
   };
 
   return (
-    <PageContainer content={<HeaderContent />}>
+    <PageContainer header={{ title: '', breadcrumb: {} }} content={<HeaderContent />}>
       <ProForm
         name="deviceConfig"
         layout="horizontal"

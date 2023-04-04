@@ -44,10 +44,11 @@ export default [
     ],
   },
   {
-    name: '设备管理',
+    name: '控制台',
     path: '/device',
     component: './Device',
     icon: 'dashboard',
+    hideInBreadcrumb: true,
   },
   {
     name: '算法配置',

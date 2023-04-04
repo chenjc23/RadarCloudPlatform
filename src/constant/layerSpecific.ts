@@ -14,9 +14,10 @@ export const dawangshan = {
 
 export const tempTarget = {
   // DEM的url地址
-  terrainUrl: 'http://localhost:83/slicehash/dawangshan',
+  terrainUrl: 'http://localhost:83/slicehash/demo',
+  //terrainUrl: 'http://localhost:83/slicehash/dawangshan',
   // 暂时需要的贴图url地址
   defoUrl: 'http://localhost:83/sarImage/',
 };
 
-export const imgPathPrefix = 'http://localhost:83/sarImage/';
+export const imgPathPrefix = 'http://localhost:83/ampImage/';

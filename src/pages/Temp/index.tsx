@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { PageContainer, ProCard } from '@ant-design/pro-components';
 import { message, Button, Form, Input, Select, Row, Col, Card } from 'antd';
-import { tcpConnect } from '@/services/deviceWide/tcpConnect';
-import { setDeviceParams } from '@/services/deviceWide/setDeviceParams';
-import { staticRead, readBinaryPerSecond } from '@/services/deviceWide/staticRead';
-import type { JsonDataType } from '@/services/deviceWide/staticRead';
+import { tcpConnect } from '@/services/deviceWise/tcpConnect';
+import { setDeviceParams } from '@/services/deviceWise/setDeviceParams';
+import { staticRead, readBinaryPerSecond } from '@/services/deviceWise/staticRead';
+import type { JsonDataType } from '@/services/deviceWise/staticRead';
 
 import { Line } from '@ant-design/charts';
 

@@ -8,7 +8,7 @@ _roadhog-api-doc
 
 /public/static
 
-/extern
+/server/extern
 
 # production
 /dist

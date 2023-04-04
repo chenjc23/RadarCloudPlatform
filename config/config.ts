@@ -85,6 +85,7 @@ export default defineConfig({
     locale: true,
     ...defaultSettings,
   },
+  //layout: false,
   /**
    * @name 国际化插件
    * @doc https://umijs.org/docs/max/i18n

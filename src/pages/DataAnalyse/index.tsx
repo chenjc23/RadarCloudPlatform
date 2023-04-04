@@ -11,6 +11,7 @@ import DataAnalyseCharts from './components/DataAnalyseCharts';
 
 //import type { GnotePoint, DistancePoint } from "@/models/supervisePoint";
 import styles from './index.less';
+import DeviceInfoBox from '@/pages/Device/components/DeviceInfoBox';
 
 const gnoteItems = [
   {
@@ -75,12 +76,12 @@ const DataAnalyse: React.FC = () => {
   };
 
   return (
-    <PageContainer header={{ title: '', breadcrumb: {} }}>
+    <PageContainer header={{ title: '', breadcrumb: {} }} className={styles.container}>
       <Row>
         <Col span={5}>
           <ProCard split="horizontal">
             <ProCard title="系统操作">
-              <Button>读取图像</Button>
+              <DeviceInfoBox status={'online'} />
             </ProCard>
             <ProCard title="系统状态">
               <Radio.Group value={1}>

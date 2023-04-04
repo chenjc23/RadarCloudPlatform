@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Line } from '@ant-design/charts';
 import { Radio } from 'antd';
 import { ProCard } from '@ant-design/pro-components';
-import { getDefoData } from '@/services/cesiumWide/askForMeta';
+import { getDefoData } from '@/services/cesiumWise/askForMeta';
 
 const DataAnalyseCharts: React.FC = () => {
   const [data, setData] = useState([]);
