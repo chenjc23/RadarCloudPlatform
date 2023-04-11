@@ -20,5 +20,13 @@ server.setRoute('/device/readBinaryPerSecond', require('./service/device/readBin
 // image
 server.setRoute('/image/fetch', require('./service/image/fetchSarImage'));
 
+// monitor
+server.setRoute('/monitor/addBatch', require('./service/monitor/batch').addBatch);
+server.setRoute('/monitor/getBatch', require('./service/monitor/batch').getBatch);
+
+// targetPoints
+server.setRoute('/monitor/addTgPoint', require('./service/monitor/tgData').addTgPoint);
+server.setRoute('/monitor/getTgData', require('./service/monitor/tgData').getTgData);
+
 // server启动
 server.listen(3000);

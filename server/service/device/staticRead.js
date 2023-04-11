@@ -1,4 +1,4 @@
-const db = require('../../app');
+const db = require('../../app').db;
 const radarSocket = require('../../RadarServer/index');
 const fs = require('fs');
 const {

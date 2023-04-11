@@ -71,7 +71,7 @@ export default [
   },
   {
     path: '/',
-    redirect: '/welcome',
+    redirect: '/dataAnalyse',
   },
   {
     path: '*',

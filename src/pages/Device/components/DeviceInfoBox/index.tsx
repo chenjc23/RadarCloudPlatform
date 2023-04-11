@@ -31,21 +31,21 @@ const DeviceInfoBox: React.FC<DeviceInfoBoxType> = (props) => {
       <Space size={'middle'}>
         <div>
           雷达：
-          <Tag color="geekblue" onClick={() => setShowDetail(true)}>
+          <Tag color="#2db7f5" onClick={() => setShowDetail(true)}>
             {myRadar.radarName}
           </Tag>
         </div>
         <div>状态：{badge}</div>
       </Space>
 
-      <Space>
+      <Space style={{ marginTop: '10px' }}>
         <Button type="primary" loading={false} icon={<PoweroffOutlined />}>
           重启
         </Button>
         <Button type="primary" icon={<CaretRightOutlined />}>
           开始
         </Button>
-        <Button type="primary" shape="circle" icon={<PauseOutlined />} />
+        {/*<Button type="primary" shape="circle" icon={<PauseOutlined />} />*/}
       </Space>
       <Modal open={showDetail} onCancel={() => setShowDetail(false)} footer={false} centered>
         <Descriptions title={'设备信息'} bordered size={'middle'} column={2}>

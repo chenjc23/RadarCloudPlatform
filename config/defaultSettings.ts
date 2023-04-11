@@ -9,7 +9,7 @@ const Settings: LayoutSettings & {
 } = {
   navTheme: 'realDark',
   // 拂晓蓝
-  colorPrimary: '#722ED1',
+  colorPrimary: '#13C2C2',
   layout: 'top',
   contentWidth: 'Fluid',
   fixedHeader: false,
@@ -18,6 +18,7 @@ const Settings: LayoutSettings & {
   title: '边坡稳定监测雷达',
   pwa: false,
   logo: 'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
+  //logo: './public/pro_icon.svg',
   iconfontUrl: '',
 };
 

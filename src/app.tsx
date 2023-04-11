@@ -12,6 +12,7 @@ import './plugins/axios';
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
+const dataAnalysePath = '/dataAnalyse';
 
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
@@ -57,7 +58,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     waterMarkProps: {
       //content: initialState?.currentUser?.name,
     },
-    footerRender: () => <Footer />,
+    footerRender: () => (window.location.pathname === dataAnalysePath ? <></> : <Footer />),
     onPageChange: () => {
       const { location } = history;
       // 如果没有登录，重定向到 login

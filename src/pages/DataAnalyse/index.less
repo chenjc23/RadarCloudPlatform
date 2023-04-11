@@ -1,17 +1,11 @@
 @import (reference) '~antd/es/style/themes/index';
 
 .container {
-  padding: 0;
-  background: @layout-body-background;
-}
+  height: 100%;
 
-//@media (min-width: @screen-md-min) {
-//  .container {
-//    //background-image: url('https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/V-_oS6r-i7wAAAAAAAAAAAAAFl94AQBr');
-//    background-image: url('../../../public/pic/bg.jpg');
-//    background-size: cover;
-//  }
-//}
+  margin: 0 12px;
+  overflow: hidden;
+}
 
 .radioGroup {
   display: flex;
@@ -38,4 +32,10 @@
 .modelSwitch {
   margin-left: 12px;
   scale: 120%;
+}
+
+.imgBoxWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }

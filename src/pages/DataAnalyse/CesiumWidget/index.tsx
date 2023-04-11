@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRef, useEffect, useState } from 'react';
-import { Button, message, Modal } from 'antd';
+import { Button, Input, message, Modal } from 'antd';
 
 import {
   CameraOutlined,
@@ -11,10 +11,11 @@ import {
 import ColorBar from '@/components/ColorBar';
 
 import { fetchSarImage } from '@/services/imgWise/fetchSarImage';
-import { addMonitorArea } from '@/services/cesiumWise/addMonitorArea';
+import { addMonitorArea } from '@/services/cesiumWise/MonitorArea';
 
 import { CesiumViewer } from './CesiumViewer';
 import styles from './index.less';
+import { addTgPoint } from '@/services/monitorWise/targetWise';
 
 const viewer = new CesiumViewer();
 
@@ -22,48 +23,55 @@ type CesiumWidgetPropsType = {
   imageType?: 'intensity' | 'defo';
   displayMode?: 'realtime' | 'history';
   batchId?: any;
+  onAddTgSuccess?: any;
 };
 
 type ConfirmModalPropsType = {
   open: boolean;
-  onOk: () => void;
+  onOk: (tgName: string) => void;
   onCancel: () => void;
 };
 
 const ConfirmModal: React.FC<ConfirmModalPropsType> = (props: ConfirmModalPropsType) => {
   const { open, onOk, onCancel } = props;
   const [confirmLoading, setConfirmLoading] = useState(false);
-
-  const handleOk = async () => {
-    setConfirmLoading(true);
-    await onOk();
-    // result ? message.success("监测点保存成功") : message.error("网络异常，保存失败");
-    setConfirmLoading(false);
-  };
+  const [tgName, setTgName] = useState<string>('');
 
   return (
     <Modal
+      width={400}
       title="Confirm"
       open={open}
-      onOk={handleOk}
+      onOk={async () => {
+        setConfirmLoading(true);
+        await onOk(tgName);
+        setConfirmLoading(false);
+      }}
       confirmLoading={confirmLoading}
       onCancel={onCancel}
     >
-      <p>是否确定保存所选区域？</p>
+      <p>设置监测点名称：</p>
+      <Input value={tgName} onChange={(e) => setTgName(e.target.value)} required />
     </Modal>
   );
 };
 
 const CesiumWidget: React.FC<CesiumWidgetPropsType> = (props: CesiumWidgetPropsType) => {
-  const { imageType, displayMode, batchId } = props;
-  const [showGlobe, setShowGlobe] = useState<boolean>(false);
+  const { imageType, displayMode, batchId, onAddTgSuccess } = props;
+  const [showGlobe, setShowGlobe] = useState<boolean>(true);
 
   const [showModal, setShowModal] = useState<boolean>(false);
 
-  const handleModalConfirm = async () => {
-    const result = await addMonitorArea({ areaLoc: viewer.startPoint.concat(viewer.endPoint) });
+  // 选取监测点
+  const handleTgConfirm = async (tgName: string) => {
+    const result = await addTgPoint({
+      batchId,
+      tgName,
+      tgScale: viewer.startPoint.concat(viewer.endPoint),
+    });
     if (result) {
       viewer.confirmArea();
+      onAddTgSuccess();
       message.success('监测点保存成功！');
     } else {
       viewer.cancelArea();
@@ -75,7 +83,7 @@ const CesiumWidget: React.FC<CesiumWidgetPropsType> = (props: CesiumWidgetPropsT
     setShowModal(false);
   };
 
-  const handleModalCancel = async () => {
+  const handleTgCancel = async () => {
     viewer.cancelArea();
     // 禁用cesium区域选择事件
     viewer.areaPickFlag = false;
@@ -128,35 +136,37 @@ const CesiumWidget: React.FC<CesiumWidgetPropsType> = (props: CesiumWidgetPropsT
     viewer.flytoOrigin();
   };
 
+  const BtGroup: React.FC = () => {
+    return (
+      <div className={'buttonGroup'}>
+        <Button
+          icon={showGlobe ? <MinusSquareOutlined /> : <PlusSquareOutlined />}
+          style={{ zoom: '130%' }}
+          onClick={handleFullViewToggle}
+        />
+        <Button icon={<CameraOutlined />} style={{ zoom: '130%' }} onClick={handleSetDefaultView} />
+        <Button
+          icon={<RadiusBottomrightOutlined />}
+          style={{ zoom: '130%' }}
+          onClick={handleAreaPickToggle}
+        />
+      </div>
+    );
+  };
+
   return (
     <>
-      <div className={styles.cesium}>
-        <div className={styles.topLayer}>
-          <div className={'buttonGroup'}>
-            <Button
-              icon={showGlobe ? <MinusSquareOutlined /> : <PlusSquareOutlined />}
-              style={{ zoom: '130%' }}
-              onClick={handleFullViewToggle}
-            />
-            <Button
-              icon={<CameraOutlined />}
-              style={{ zoom: '130%' }}
-              onClick={handleSetDefaultView}
-            />
-            <Button
-              icon={<RadiusBottomrightOutlined />}
-              style={{ zoom: '130%' }}
-              onClick={handleAreaPickToggle}
-            />
-          </div>
+      <div className={styles.container}>
+        <div className={styles.cover}>
+          <BtGroup />
           <ColorBar />
         </div>
-        <div id="cesiumContainer" />
+        <div id="cesiumContainer" className={styles.cesium} />
       </div>
       <ConfirmModal
         open={showModal}
-        onOk={handleModalConfirm}
-        onCancel={handleModalCancel}
+        onOk={handleTgConfirm}
+        onCancel={handleTgCancel}
       ></ConfirmModal>
     </>
   );

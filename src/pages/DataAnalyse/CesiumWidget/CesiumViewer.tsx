@@ -55,6 +55,7 @@ export class CesiumViewer {
     this.currentImg = null;
     this.currentAreaEntity = null;
     this.areaEntities = [];
+    this.areaPoints = [];
 
     this.startPoint = null;
     this.endPoint = null;
@@ -67,14 +68,14 @@ export class CesiumViewer {
     });
     // 创建viewer视图
     this.viewer = new Cesium.Viewer('cesiumContainer', {
-      // imageryProvider: new Cesium.ArcGisMapServerImageryProvider({
-      //   url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
-      // }),
+      imageryProvider: new Cesium.ArcGisMapServerImageryProvider({
+        url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
+      }),
       // terrainProvider : new Cesium.CesiumTerrainProvider({
       //   url : Cesium.IonResource.fromAssetId(3956),
       //   requestVertexNormals : true
       // }),
-      terrainProvider,
+      //terrainProvider,
       homeButton: false,
       navigationHelpButton: false,
       geocoder: true,
@@ -89,15 +90,15 @@ export class CesiumViewer {
       selectionIndicator: false,
       fullscreenButton: false,
     });
+    // this.viewer.imageryLayers.addImageryProvider(new Cesium.ArcGisMapServerImageryProvider({
+    //   url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
+    // }));
     this.viewer.imageryLayers.addImageryProvider(
       new Cesium.SingleTileImageryProvider({
         url: 'http://localhost:83/temp/defo.png',
         rectangle: Cesium.Rectangle.fromDegrees(lngMin, latMin, lngMax, latMax),
       }),
     );
-    // this.viewer.imageryLayers.addImageryProvider(new Cesium.ArcGisMapServerImageryProvider({
-    //   url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
-    // }),);
 
     this.viewer._cesiumWidget._creditContainer.style.display = 'none'; //隐藏logo版权
 
@@ -186,8 +187,12 @@ export class CesiumViewer {
         material: Cesium.Color.GREEN.withAlpha(0.6),
       },
     });
+
     this.viewer.entities.remove(this.currentAreaEntity);
+    // 添加存储实体
     this.areaEntities.push(this.currentAreaEntity);
+    // 添加实体位置（用于向后端传输）
+    this.areaPoints = this.areaPoints.concat(this.startPoint, this.endPoint);
     this.startPoint = null;
     this.endPoint = null;
   };
@@ -282,7 +287,7 @@ export class CesiumViewer {
       unionClippingRegions: true,
       edgeWidth: 1.0,
       edgeColor: Cesium.Color.LIGHTSLATEGRAY,
-      enabled: true,
+      enabled: false,
     });
     globe.backFaceCulling = false;
     globe.showSkirts = false;

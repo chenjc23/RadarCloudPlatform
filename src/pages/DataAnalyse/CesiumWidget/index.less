@@ -1,20 +1,16 @@
-.cesium {
+.container {
   position: relative;
-  //display: block;
-  .topLayer {
-    position: absolute;
-    //top: 5px;
-    //left: 5px;
-    z-index: 1;
-    //width: 100%;
-    height: 100%;
-    overflow: hidden;
-    //// 不允许子元素超出父元素范围
-    //max-height: 100%;
+  height: 70vh;
+  border: 3px solid #339999;
 
-    //opacity: 0.8;
-    //& > * {
-    //  margin: 2px;
-    //}
+  .cover {
+    & > {
+      position: absolute;
+      z-index: 1;
+    }
   }
+}
+
+.cesium {
+  height: 100%;
 }

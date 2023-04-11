@@ -5,8 +5,13 @@ const {
 } = require('./config/config');
 const { MongoClient } = require('mongodb');
 
+const { UUID } = require('bson');
+
 // 连接MongoDB server
-const client = new MongoClient(url);
+const client = new MongoClient(url, {
+  pkFactory: { createPk: () => new UUID().toString() },
+});
+
 client
   .connect()
   .then(() => console.log('Mongodb client connected successfully'))
@@ -14,4 +19,5 @@ client
 // console.log('Mongodb client connected successfully');
 const db = client.db(dbName);
 
-module.exports = db;
+module.exports.db = db;
+module.exports.client = client;

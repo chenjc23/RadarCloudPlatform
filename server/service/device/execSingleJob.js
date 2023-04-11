@@ -1,4 +1,4 @@
-const db = require('../../app');
+const db = require('../../app').db;
 const radarSocket = require('../../RadarServer/index');
 const fs = require('fs');
 const {
@@ -6,7 +6,7 @@ const {
 } = require('../../config/config');
 
 const async = require('async');
-const subApertureImaging = require('../../core/subApertureImaging');
+const subApertureImaging = require('../../extern/subApertureImaging');
 
 const long32_2_uint8 = (num) => {
   const num1 = Math.round(num);
@@ -128,7 +128,7 @@ module.exports = async (content, req, res) => {
     dataProcess,
   ]);
 
-  const subApertureImaging = require('../../core/subApertureImaging');
+  const subApertureImaging = require('../../extern/subApertureImaging');
   const imgName = nowId + '_raw.png';
   await subApertureImaging(fileName, sarImagePrefix + imgName);
   console.log('===原始数据成像处理完成！');

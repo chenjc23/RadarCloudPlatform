@@ -3,7 +3,7 @@ const {
   radarNetConfig: { host, port },
 } = require('./config/config');
 const radarSocket = require('./index');
-const subApertureImaging = require('../core/subApertureImaging');
+const subApertureImaging = require('../extern/subApertureImaging');
 
 class RadarDataSocket {
   constructor() {
